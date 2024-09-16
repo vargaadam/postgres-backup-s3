@@ -26,6 +26,7 @@ services:
       POSTGRES_DATABASE: dbname
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+      PGDUMP_PARALLEL_JOBS: 8
 ```
 
 - Images are tagged by the major PostgreSQL version supported: `12`, `13`, `14`, `15` or `16`.
