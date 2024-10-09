@@ -13,14 +13,14 @@ pg_dump -Fd \
         -U $POSTGRES_USER \
         -d $POSTGRES_DATABASE \
         $PGDUMP_EXTRA_OPTS \
-        -f db_backup_dir
+        -f $PGDUMP_BACKUP_DIR
 
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
 s3_uri_base="s3://${S3_BUCKET}/${S3_PREFIX}/${POSTGRES_DATABASE}_${timestamp}.tar"
 
 # Compress the directory into a tar file
 echo "Compressing backup directory..."
-tar -cf db_backup.tar db_backup_dir
+tar -cf db_backup.tar $PGDUMP_BACKUP_DIR
 
 local_file="db_backup.tar"
 s3_uri="$s3_uri_base"
@@ -31,7 +31,7 @@ aws $aws_args s3 cp "$local_file" "$s3_uri"
 
 # Clean up
 rm "$local_file"
-rm -rf db_backup_dir
+rm -rf $PGDUMP_BACKUP_DIR
 
 echo "Backup complete."
 

@@ -29,6 +29,11 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
   exit 1
 fi
 
+if [ -z "$PGDUMP_BACKUP_DIR" ]; then
+  echo "You need to set the PGDUMP_BACKUP_DIR environment variable."
+  exit 1
+fi
+
 if [ -z "$S3_ENDPOINT" ]; then
   aws_args=""
 else
