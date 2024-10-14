@@ -4,6 +4,7 @@ set -eu
 set -o pipefail
 
 source ./env.sh
+backup_dir=$PGDUMP_BACKUP_DIR/backup
 
 echo "Creating parallel backup of $POSTGRES_DATABASE database..."
 pg_dump -Fd \
@@ -13,16 +14,18 @@ pg_dump -Fd \
         -U $POSTGRES_USER \
         -d $POSTGRES_DATABASE \
         $PGDUMP_EXTRA_OPTS \
-        -f $PGDUMP_BACKUP_DIR
+        -f $backup_dir
 
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
 s3_uri_base="s3://${S3_BUCKET}/${S3_PREFIX}/${POSTGRES_DATABASE}_${timestamp}.tar"
 
+local_file="$PGDUMP_BACKUP_DIR/db_backup.tar"
+
 # Compress the directory into a tar file
 echo "Compressing backup directory..."
-tar -cf db_backup.tar $PGDUMP_BACKUP_DIR
+tar -cf $local_file $backup_dir
 
-local_file="db_backup.tar"
+
 s3_uri="$s3_uri_base"
 
 # Upload the backup
@@ -31,7 +34,7 @@ aws $aws_args s3 cp "$local_file" "$s3_uri"
 
 # Clean up
 rm "$local_file"
-rm -rf $PGDUMP_BACKUP_DIR
+rm -rf $backup_dir
 
 echo "Backup complete."
 
